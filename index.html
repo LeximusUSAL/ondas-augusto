@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dibujar la música: Augusto y la escucha artística · Ondas 1925–1939</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #0a0a0a;
+      --dark:  #111111;
+      --card:  #1a1a1a;
+      --gold:  #c9a84c;
+      --gold2: #e8c97a;
+      --text:  #e8e8e8;
+      --muted: #9a9a9a;
+      --white: #ffffff;
+      --serif: 'Georgia', 'Times New Roman', serif;
+      --sans:  'Helvetica Neue', Arial, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
+    body { background: var(--black); color: var(--text); font-family: var(--sans); overflow-x: hidden; }
+
+    #progress-bar {
+      position: fixed; top: 0; left: 0; height: 2px; width: 0%;
+      background: var(--gold); z-index: 1000; transition: width 0.15s ease;
+    }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 32px;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, transparent 100%);
+      pointer-events: none;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 10px; pointer-events: all; }
+    .nav-logo  { font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted); }
+    .nav-sep   { color: var(--gold); opacity: 0.5; }
+    .nav-title { font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); }
+
+    #slide-nav {
+      position: fixed; right: 24px; top: 50%; transform: translateY(-50%);
+      z-index: 800; display: flex; flex-direction: column; gap: 7px; pointer-events: all;
+    }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.25); cursor: pointer; transition: all 0.3s ease; }
+    .dot.active { background: var(--gold); transform: scale(1.5); }
+    .dot:hover  { background: rgba(255,255,255,0.6); }
+
+    section { scroll-snap-align: start; min-height: 100vh; position: relative; display: flex; align-items: center; justify-content: center; }
+
+    /* ── HERO ── */
+    #hero { overflow: hidden; background: var(--black); }
+
+    .hero-bg {
+      position: absolute; inset: 0;
+      background-image: url('images/CABECERA.webp');
+      background-size: cover; background-position: center 30%;
+      filter: brightness(0.30) saturate(0.55);
+      transform: scale(1.04); transition: transform 8s ease;
+    }
+    #hero:hover .hero-bg { transform: scale(1); }
+
+    .hero-gradient {
+      position: absolute; inset: 0;
+      background: linear-gradient(160deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.0) 40%, rgba(10,10,10,0.9) 85%, var(--black) 100%);
+    }
+
+    .hero-content { position: relative; z-index: 2; max-width: 760px; padding: 80px 48px 60px; text-align: center; }
+    .hero-eyebrow { font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold); margin-bottom: 28px; }
+    .hero-title {
+      font-family: var(--serif); font-size: clamp(3rem, 7vw, 6rem);
+      font-weight: 400; line-height: 1.05; color: var(--white); margin-bottom: 32px; letter-spacing: -0.01em;
+    }
+    .hero-title em { font-style: italic; color: var(--gold2); }
+    .hero-subtitle {
+      font-size: 15px; line-height: 1.75; color: rgba(232,232,232,0.75);
+      max-width: 520px; margin: 0 auto 48px; font-family: var(--serif); font-style: italic;
+    }
+    .hero-meta { display: flex; align-items: center; justify-content: center; gap: 24px; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); }
+
+    .scroll-hint {
+      position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+      z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 8px;
+      color: var(--muted); font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase;
+      animation: fadeInUp 2s ease 1.5s both;
+    }
+    .scroll-arrow { width: 1px; height: 40px; background: linear-gradient(to bottom, transparent, var(--gold)); animation: scrollLine 2s ease-in-out infinite; }
+
+    @keyframes scrollLine {
+      0%, 100% { transform: scaleY(0.3); opacity: 0.4; transform-origin: top; }
+      50%       { transform: scaleY(1);   opacity: 1;   transform-origin: top; }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    /* ── INTRO ── */
+    #intro { background: var(--dark); justify-content: flex-start; align-items: stretch; }
+    .intro-inner { width: 100%; display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; }
+    .intro-image-col { position: relative; overflow: hidden; }
+    .intro-image-col img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; filter: brightness(0.6) saturate(0.75); }
+    .intro-image-overlay { position: absolute; inset: 0; background: linear-gradient(to right, transparent 60%, var(--dark) 100%); }
+    .intro-text-col { display: flex; flex-direction: column; justify-content: center; padding: 80px 64px 80px 48px; }
+
+    .section-number { font-size: 9px; letter-spacing: 0.5em; text-transform: uppercase; color: var(--gold); margin-bottom: 20px; opacity: 0.8; }
+    .section-label  { font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted); margin-bottom: 32px; border-left: 2px solid var(--gold); padding-left: 16px; }
+    .section-heading { font-family: var(--serif); font-size: clamp(1.8rem, 3vw, 2.8rem); font-weight: 400; line-height: 1.2; color: var(--white); margin-bottom: 28px; }
+    .section-body { font-family: var(--serif); font-size: 15.5px; line-height: 1.85; color: rgba(232,232,232,0.78); max-width: 520px; }
+    .section-body p + p { margin-top: 18px; }
+
+    /* ── SLIDES ── */
+    .slide { background: var(--black); overflow: hidden; flex-direction: column; }
+    .slide-inner { position: relative; width: 100%; min-height: 100vh; display: grid; }
+    .slide-inner.layout-a { grid-template-columns: 58% 42%; }
+    .slide-inner.layout-b { grid-template-columns: 42% 58%; }
+
+    .slide-image { position: relative; overflow: hidden; }
+    .slide-image img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; transition: transform 10s ease; }
+    .slide:hover .slide-image img { transform: scale(1.04); }
+
+    .slide-image-vignette { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.0) 50%); }
+    .layout-b .slide-image-vignette { background: linear-gradient(-135deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.0) 50%); }
+
+    .slide-text { display: flex; flex-direction: column; justify-content: center; padding: 72px 56px; background: var(--card); position: relative; }
+    .layout-b .slide-text { order: -1; background: var(--dark); }
+
+    .slide-date   { font-size: 9px; letter-spacing: 0.5em; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; }
+    .slide-num    { font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); margin-bottom: 28px; }
+    .slide-author { font-size: 9px; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(201,168,76,0.6); margin-bottom: 8px; }
+    .slide-title  { font-family: var(--serif); font-size: clamp(1.4rem, 2.2vw, 2.2rem); font-weight: 400; line-height: 1.25; color: var(--white); margin-bottom: 24px; }
+    .slide-body   { font-family: var(--serif); font-size: 14.5px; line-height: 1.85; color: rgba(232,232,232,0.72); max-width: 440px; }
+    .slide-body p + p { margin-top: 14px; }
+
+    .slide-caption { margin-top: 32px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.07); }
+    .slide-caption-text { font-size: 10px; color: var(--muted); line-height: 1.5; font-style: italic; }
+
+    /* ── CODA ── */
+    #coda { background: var(--dark); border-top: 1px solid rgba(255,255,255,0.05); }
+    .coda-inner { text-align: center; padding: 80px 48px; max-width: 720px; margin: 0 auto; }
+    .coda-icon  { font-size: 32px; margin-bottom: 32px; opacity: 0.6; }
+    .coda-title { font-family: var(--serif); font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 400; color: var(--white); margin-bottom: 24px; line-height: 1.2; }
+    .coda-body  { font-family: var(--serif); font-size: 15px; line-height: 1.8; color: rgba(232,232,232,0.7); margin-bottom: 40px; }
+    .coda-body p + p { margin-top: 16px; }
+    .coda-link { display: inline-flex; align-items: center; gap: 10px; padding: 14px 32px; border: 1px solid var(--gold); color: var(--gold); text-decoration: none; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; transition: all 0.25s ease; }
+    .coda-link:hover { background: var(--gold); color: var(--black); }
+    .coda-link svg { width: 14px; height: 14px; }
+
+    /* ── FOOTER ── */
+    footer { background: var(--black); border-top: 1px solid rgba(255,255,255,0.05); padding: 40px 48px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; }
+    .footer-left { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); line-height: 1.8; }
+    .footer-left strong { display: block; color: var(--gold); margin-bottom: 4px; letter-spacing: 0.3em; }
+    .footer-right { font-size: 10px; color: var(--muted); text-align: right; line-height: 1.8; }
+
+    /* ── REVEAL ── */
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.35s; }
+
+    .gold-line { display: block; width: 40px; height: 1px; background: var(--gold); margin: 20px 0; opacity: 0.6; }
+
+    @media (max-width: 768px) {
+      .intro-inner, .slide-inner.layout-a, .slide-inner.layout-b { grid-template-columns: 1fr; }
+      .intro-image-col { min-height: 40vh; }
+      .slide-image     { min-height: 45vh; }
+      .layout-b .slide-text { order: unset; }
+      .slide-text, .intro-text-col { padding: 48px 28px; }
+      nav { padding: 14px 20px; }
+      #slide-nav { display: none; }
+      .hero-content { padding: 80px 24px 60px; }
+      footer { flex-direction: column; }
+      .footer-right { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<nav>
+  <div class="nav-brand">
+    <span class="nav-logo">Ondas · 1925–1939</span>
+    <span class="nav-sep">—</span>
+    <span class="nav-title">Itinerario 6</span>
+  </div>
+</nav>
+
+<div id="slide-nav">
+  <div class="dot active" data-target="hero"      title="Inicio"></div>
+  <div class="dot"        data-target="intro"     title="Dibujar la música"></div>
+  <div class="dot"        data-target="slide-001" title="Fantochines, 1927"></div>
+  <div class="dot"        data-target="slide-002" title="Aida, 1929"></div>
+  <div class="dot"        data-target="slide-003" title="La Walkyria, 1929"></div>
+  <div class="dot"        data-target="slide-004" title="Carmen, 1929"></div>
+  <div class="dot"        data-target="slide-005" title="Madame Butterfly, 1930"></div>
+  <div class="dot"        data-target="slide-006" title="Las golondrinas, 1931"></div>
+  <div class="dot"        data-target="slide-007" title="Ifigenia en Áulide, 1934"></div>
+  <div class="dot"        data-target="slide-008" title="El pájaro de fuego, 1929"></div>
+  <div class="dot"        data-target="slide-009" title="Pacific 231, 1929"></div>
+  <div class="dot"        data-target="slide-010" title="Preludio al fauno, 1929"></div>
+  <div class="dot"        data-target="slide-011" title="El amor brujo, 1929"></div>
+  <div class="dot"        data-target="slide-012" title="El velatorio, 1935"></div>
+  <div class="dot"        data-target="slide-013" title="Portada Ondas, 1926"></div>
+  <div class="dot"        data-target="coda"      title="Explorar más"></div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     HERO
+══════════════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-gradient"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow reveal">Itinerario 6 · Exposición Ondas</p>
+    <h1 class="hero-title reveal reveal-delay-1">
+      Dibujar<br>la <em>música</em>
+    </h1>
+    <p class="hero-subtitle reveal reveal-delay-2">
+      Augusto Fernández Sastre tradujo al lenguaje gráfico del art déco y la vanguardia
+      lo que el oyente de radio solo podía escuchar: óperas, ballets y música pura.
+    </p>
+    <div class="hero-meta reveal reveal-delay-3">
+      <span>1926 — 1935</span>
+      <span>·</span>
+      <span>Augusto · Revista Ondas</span>
+      <span>·</span>
+      <span>13 ilustraciones</span>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-arrow"></div>
+    <span>Desplaza</span>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     000 — INTRO
+══════════════════════════════════════════ -->
+<section id="intro">
+  <div class="intro-inner">
+    <div class="intro-image-col">
+      <img src="images/000.webp" alt="Parsifal, ilustración de Augusto para Ondas, 1929">
+      <div class="intro-image-overlay"></div>
+    </div>
+    <div class="intro-text-col">
+      <p class="section-number reveal">000</p>
+      <p class="section-label reveal reveal-delay-1">Dibujar la música</p>
+      <h2 class="section-heading reveal reveal-delay-2">
+        Dar ojos<br>a lo que solo tiene sonido
+      </h2>
+      <span class="gold-line reveal reveal-delay-2"></span>
+      <div class="section-body reveal reveal-delay-3">
+        <p>
+          La ópera y la zarzuela, géneros concebidos para ser vistos y escuchados a la vez,
+          fueron paradójicamente los que más peso tuvieron en la revista <em>Ondas</em>.
+          ¿Cómo ilustrar lo que el oyente solo podía escuchar?
+        </p>
+        <p>
+          Desde 1926, el dibujante Augusto Fernández Sastre dio respuesta a esa pregunta.
+          Augusto no solo ilustraba la música, la actualizaba visualmente: traducía a un
+          lenguaje gráfico modernista, entre el art déco, el expresionismo y las nuevas
+          estéticas de vanguardia, obras del pasado (Verdi, Puccini, Wagner, Gluck) y de
+          la más estricta contemporaneidad (Stravinsky, Debussy, Honegger, Falla).
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     001 — Fantochines (1927)
+══════════════════════════════════════════ -->
+<section id="slide-001" class="slide">
+  <div class="slide-inner layout-a">
+    <div class="slide-image">
+      <img src="images/001.webp" alt="Fantochines, ópera de Conrado del Campo, ilustración de Augusto, 1927">
+      <div class="slide-image-vignette"></div>
+    </div>
+    <div class="slide-text">
+      <p class="slide-num reveal">001</p>
+      <p class="slide-date reveal">18 de enero de 1927</p>
+      <p class="slide-author reveal">Conrado del Campo · Tomás Borrás</p>
+      <h2 class="slide-title reveal reveal-delay-1">Fantochines</h2>
+      <span class="gold-line reveal reveal-delay-1"></span>
+      <div class="slide-body reveal reveal-delay-2">
+        <p>
+          Abrimos con la ópera de cámara <em>Fantochines</em>: un escenario teatral enmarcado
+          por cortinas art déco, con dos figuras estilizadas que parecen marionetas en un
+          teatro de títeres, fieles al título de la obra.
+        </p>
+        <p>
+          El dibujo, con su juego de perspectivas geométricas y superficies planas, muestra
+          la voluntad de Augusto de traducir la escena operística a un lenguaje visual moderno,
+          muy distinto de la ilustración costumbrista de la época.
+        </p>
+      </div>
+      <div class="slide-caption reveal reveal-delay-3">
+        <div class="slide-caption-text">Ilustración de Augusto · <em>Ondas</em>, 18 ene. 1927</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     002 — Aida (1929)
+══════════════════════════════════════════ -->
+<section id="slide-002" class="slide">
+  <div class="slide-inner layout-b">
+    <div class="slide-image">
+      <img src="images/002.webp" alt="Aida de Verdi, ilustración de Augusto, 1929">
+      <div class="slide-image-vignette"></div>
+    </div>
+    <div class="slide-text">
+      <p class="slide-num reveal">002</p>
+      <p class="slide-date reveal">27 de julio de 1929</p>
+      <p class="slide-author reveal">Giuseppe Verdi</p>
+      <h2 class="slide-title reveal reveal-delay-1">Aida</h2>
+      <span class="gold-line reveal reveal-delay-1"></span>
+      <div class="slide-body reveal reveal-delay-2">
+        <p>
+          La monumental escena del segundo acto, con sus columnas egipcias, sus hileras de
+          sacerdotes y la figura del guerrero Radamés en el centro, recibe un tratamiento
+          decididamente art déco.
+        </p>
+        <p>
+          Las columnas, decoradas con motivos geométricos que evocan tanto el antiguo Egipto
+          como la modernidad de la Exposición de Artes Decorativas de París de 1925 —donde
+          el propio Augusto fue premiado— convierten una ópera de 1871 en una imagen
+          plenamente contemporánea.
+        </p>
+      </div>
+      <div class="slide-caption reveal reveal-delay-3">
+        <div class="slide-caption-text">Ilustración de Augusto · <em>Ondas</em>, 27 jul. 1929</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     003 — La Walkyria (1929)
+══════════════════════════════════════════ -->
+<section id="slide-003" class="slide">
+  <div class="slide-inner layout-a">
+    <div class="slide-image">
+      <img src="images/003.webp" alt="La Walkyria de Wagner, ilustración de Augusto, 1929">
+      <div class="slide-image-vignette"></div>
+    </div>
+    <div class="slide-text">
+      <p class="slide-num reveal">003</p>
+      <p class="slide-date reveal">7 de septiembre de 1929</p>
+      <p class="slide-author reveal">Richard Wagner</p>
+      <h2 class="slide-title reveal reveal-delay-1">La Walkyria</h2>
+      <span class="gold-line reveal reveal-delay-1"></span>
+      <div class="slide-body reveal reveal-delay-2">
+        <p>
+          La escena final de <em>La Walkyria</em>: Wotan rodeado de llamas, con su casco alado
+          y su lanza. El tratamiento del cuerpo del dios, con sus volúmenes musculares resueltos
+          en planos quebrados, remite tanto al expresionismo como al futurismo.
+        </p>
+        <p>
+          Las llamas, estilizadas como lenguas geométricas, ascienden entre rocas angulosas.
+          Wagner, compositor-fetiche de la radio europea de entreguerras, recibe aquí una
+          interpretación visual que lo arranca del siglo XIX y lo sitúa en la vanguardia
+          gráfica del XX.
+        </p>
+      </div>
+      <div class="slide-caption reveal reveal-delay-3">
+        <div class="slide-caption-text">Ilustración de Augusto · <em>Ondas</em>, 7 sep. 1929</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     004 — Carmen (1929)
+══════════════════════════════════════════ -->
+<section id="slide-004" class="slide">
+  <div class="slide-inner layout-b">
+    <div class="slide-image">
+      <img src="images/004.webp" alt="Carmen de Bizet, ilustración de Augusto, 1929">
+      <div class="slide-image-vignette"></div>
+    </div>
+    <div class="slide-text">
+      <p class="slide-num reveal">004</p>
+      <p class="slide-date reveal">23 de noviembre de 1929</p>
+      <p class="slide-author reveal">Georges Bizet</p>
+      <h2 class="slide-title reveal reveal-delay-1">Carmen</h2>
+      <span class="gold-line reveal reveal-delay-1"></span>
+      <div class="slide-body reveal reveal-delay-2">
+        <p>
+          Augusto traslada <em>Carmen</em> a una Sevilla nocturna de calles estrechas y faroles.
+          La escena, probablemente del acto tercero, muestra un grupo de figuras en torno a un
+          cuerpo caído, bajo la luz de un farol.
+        </p>
+        <p>
+          El dibujo destila una atmósfera casi cinematográfica, más cercana al expresionismo
+          alemán que a la España más nacional. <em>Carmen</em> fue una de las óperas más radiadas
+          en aquellos años, y Augusto le otorgó una imagen que el oyente podía sentir como propia.
+        </p>
+      </div>
+      <div class="slide-caption reveal reveal-delay-3">
+        <div class="slide-caption-text">Ilustración de Augusto · <em>Ondas</em>, 23 nov. 1929</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     005 — Madame Butterfly (1930)
+══════════════════════════════════════════ -->
+<section id="slide-005" class="slide">
+  <div class="slide-inner layout-a">
+    <div class="slide-image">
+      <img src="images/005.webp" alt="Madame Butterfly de Puccini, ilustración de Augusto, 1930">
+      <div class="slide-image-vignette"></div>
+    </div>
+    <div class="slide-text">
+      <p class="slide-num reveal">005</p>
+      <p class="slide-date reveal">20 de diciembre de 1930</p>
+      <p class="slide-author reveal">Giacomo Puccini</p>
+      <h2 class="slide-title reveal reveal-delay-1">Madame Butterfly</h2>
+      <span class="gold-line reveal reveal-delay-1"></span>
+      <div class="slide-body reveal reveal-delay-2">
+        <p>
+          Resuelta en planos diagonales y superficies decorativas, esta composición muestra
+          la influencia del japonismo filtrado por el art déco. Augusto no imita la estampa
+          japonesa sino que la reinterpreta con su lenguaje modernista.
+        </p>
+        <p>
+          La ópera de Puccini, estrenada en 1904, es así actualizada visualmente para un
+          público radiofónico de 1930 que escuchaba la obra sin verla, pero podía imaginarla
+          a través de esta imagen.
+        </p>
+      </div>
+      <div class="slide-caption reveal reveal-delay-3">
+        <div class="slide-caption-text">Ilustración de Augusto · <em>Ondas</em>, 20 dic. 1930</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     006 — Las golondrinas (1931)
+══════════════════════════════════════════ -->
+<section id="slide-006" class="slide">
+  <div class="slide-inner layout-b">
+    <div class="slide-image">
+      <img src="images/006.webp" alt="Las golondrinas de Usandizaga, ilustración de Augusto, 1931">
+      <div class="slide-image-vignette"></div>
+    </div>
+    <div class="slide-text">
+      <p class="slide-num reveal">006</p>
+      <p class="slide-date reveal">22 de agosto de 1931</p>
+      <p class="slide-author reveal">José María Usandizaga</p>
+      <h2 class="slide-title reveal reveal-delay-1">Las golondrinas</h2>
+      <span class="gold-line reveal reveal-delay-1"></span>
+      <div class="slide-body reveal reveal-delay-2">
+        <p>
+          Una de las ilustraciones más ambiciosas de Augusto: esta escena circense del drama
+          lírico de Usandizaga estrenado en 1914. El tratamiento de los cuerpos, rotundos,
+          volumétricos, con ecos de Picasso, revela al Augusto más vanguardista.
+        </p>
+        <p>
+          <em>Las golondrinas</em>, con su historia de amor y desengaño en un circo ambulante,
+          exigía precisamente esto: una imagen que transmitiera la tragedia que la radio hacía escuchar.
+        </p>
+      </div>
+      <div class="slide-caption reveal reveal-delay-3">
+        <div class="slide-caption-text">Ilustración de Augusto · <em>Ondas</em>, 22 ago. 1931</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     007 — Ifigenia en Áulide (1934)
+══════════════════════════════════════════ -->
+<section id="slide-007" class="slide">
+  <div class="slide-inner layout-a">
+    <div class="slide-image">
+      <img src="images/007.webp" alt="Ifigenia en Áulide de Gluck, ilustración de Augusto, 1934">
+      <div class="slide-image-vignette"></div>
+    </div>
+    <div class="slide-text">
+      <p class="slide-num reveal">007</p>
+      <p class="slide-date reveal">16 de junio de 1934</p>
+      <p class="slide-author reveal">Christoph Willibald Gluck</p>
+      <h2 class="slide-title reveal reveal-delay-1">Ifigenia en Áulide</h2>
+      <span class="gold-line reveal reveal-delay-1"></span>
+      <div class="slide-body reveal reveal-delay-2">
+        <p>
+          Con esta sobrecogedora escena nocturna, Augusto aborda el repertorio más antiguo
+          de toda esta selección: la ópera de Gluck, estrenada en 1774. El dibujo, resuelto
+          en líneas finas sobre fondo negro, recuerda al grabado y conecta con la tradición
+          de la miniatura que Augusto cultivaría después en sus ediciones del <em>Quijote</em>
+          en el exilio.
+        </p>
+        <p>
+          La ópera más antigua recibe, paradójicamente, el tratamiento gráfico más depurado.
+        </p>
+      </div>
+      <div class="slide-caption reveal reveal-delay-3">
+        <div class="slide-caption-text">Ilustración de Augusto · <em>Ondas</em>, 16 jun. 1934</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     008 — El pájaro de fuego (1929)
+══════════════════════════════════════════ -->
+<section id="slide-008" class="slide">
+  <div class="slide-inner layout-b">
+    <div class="slide-image">
+      <img src="images/008.webp" alt="El pájaro de fuego de Stravinsky, ilustración de Augusto, 1929">
+      <div class="slide-image-vignette"></div>
+    </div>
+    <div class="slide-text">
+      <p class="slide-num reveal">008</p>
+      <p class="slide-date reveal">6 de julio de 1929</p>
+      <p class="slide-author reveal">Ígor Stravinsky</p>
+      <h2 class="slide-title reveal reveal-delay-1">El pájaro de fuego</h2>
+      <span class="gold-line reveal reveal-delay-1"></span>
+      <div class="slide-body reveal reveal-delay-2">
+        <p>
+          Con esta imagen entramos en el territorio más audaz de Augusto: la interpretación
+          gráfica de la música de su época. <em>El pájaro de fuego</em>, el ballet que
+          consagró a Stravinsky en 1910, aparece como una visión nocturna.
+        </p>
+        <p>
+          La composición, con sus siluetas recortadas contra un cielo de nubes art déco,
+          tiene la cualidad de una escenografía de los Ballets Rusos traducida al lenguaje
+          gráfico de la modernidad madrileña.
+        </p>
+      </div>
+      <div class="slide-caption reveal reveal-delay-3">
+        <div class="slide-caption-text">Ilustración de Augusto · <em>Ondas</em>, 6 jul. 1929</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     009 — Pacific 231 (1929)
+══════════════════════════════════════════ -->
+<section id="slide-009" class="slide">
+  <div class="slide-inner layout-a">
+    <div class="slide-image">
+      <img src="images/009.webp" alt="Pacific 231 de Honegger, ilustración de Augusto, 1929">
+      <div class="slide-image-vignette"></div>
+    </div>
+    <div class="slide-text">
+      <p class="slide-num reveal">009</p>
+      <p class="slide-date reveal">20 de julio de 1929</p>
+      <p class="slide-author reveal">Arthur Honegger</p>
+      <h2 class="slide-title reveal reveal-delay-1">Pacific 231</h2>
+      <span class="gold-line reveal reveal-delay-1"></span>
+      <div class="slide-body reveal reveal-delay-2">
+        <p>
+          Quizá la ilustración más vanguardista de toda la serie. Este poema sinfónico que
+          evoca la aceleración de una locomotora recibe un tratamiento plenamente futurista:
+          ruedas, bielas, humo y velocidad en un torbellino de diagonales que genera una
+          sensación de energía mecánica.
+        </p>
+        <p>
+          Las diagonales dominan toda la composición, traduciendo visualmente el <em>crescendo</em>
+          sonoro de la partitura. <em>Pacific 231</em> demuestra la capacidad de Augusto de
+          dar forma visual a la música pura, sin argumento ni personajes.
+        </p>
+      </div>
+      <div class="slide-caption reveal reveal-delay-3">
+        <div class="slide-caption-text">Ilustración de Augusto · <em>Ondas</em>, 20 jul. 1929</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     010 — Preludio a la siesta de un fauno (1929)
+══════════════════════════════════════════ -->
+<section id="slide-010" class="slide">
+  <div class="slide-inner layout-b">
+    <div class="slide-image">
+      <img src="images/010.webp" alt="Preludio a la siesta de un fauno de Debussy, ilustración de Augusto, 1929">
+      <div class="slide-image-vignette"></div>
+    </div>
+    <div class="slide-text">
+      <p class="slide-num reveal">010</p>
+      <p class="slide-date reveal">14 de septiembre de 1929</p>
+      <p class="slide-author reveal">Claude Debussy</p>
+      <h2 class="slide-title reveal reveal-delay-1">Preludio a la siesta de un fauno</h2>
+      <span class="gold-line reveal reveal-delay-1"></span>
+      <div class="slide-body reveal reveal-delay-2">
+        <p>
+          La obra orquestal de Debussy (1894), inspirada en el poema de Mallarmé, recibe
+          una interpretación sensual y onírica. Rostros superpuestos, el fauno con su
+          máscara grotesca, ninfas de perfiles art déco, racimos de uvas: todo se entrelaza
+          en una composición que disuelve los contornos y juega con la ambigüedad entre
+          lo humano y lo mitológico.
+        </p>
+        <p>
+          Junto con <em>Pacific 231</em>, el ejemplo más claro de cómo Augusto traducía
+          a imagen no ya un argumento, sino una experiencia sonora.
+        </p>
+      </div>
+      <div class="slide-caption reveal reveal-delay-3">
+        <div class="slide-caption-text">Ilustración de Augusto · <em>Ondas</em>, 14 sep. 1929</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     011 — El amor brujo (1929)
+══════════════════════════════════════════ -->
+<section id="slide-011" class="slide">
+  <div class="slide-inner layout-a">
+    <div class="slide-image">
+      <img src="images/011.webp" alt="El amor brujo de Manuel de Falla, ilustración de Augusto, 1929">
+      <div class="slide-image-vignette"></div>
+    </div>
+    <div class="slide-text">
+      <p class="slide-num reveal">011</p>
+      <p class="slide-date reveal">28 de septiembre de 1929</p>
+      <p class="slide-author reveal">Manuel de Falla</p>
+      <h2 class="slide-title reveal reveal-delay-1">El amor brujo</h2>
+      <span class="gold-line reveal reveal-delay-1"></span>
+      <div class="slide-body reveal reveal-delay-2">
+        <p>
+          Una bailaora, con el cuerpo estilizado en curvas sinuosas, danza suspendida en un
+          espacio abstracto donde se fragmentan guitarras, un sombrero de ala ancha y formas
+          geométricas que recuerdan al cubismo.
+        </p>
+        <p>
+          La nota «(Véase el programa del lunes)» confirma que la ilustración acompañaba
+          directamente la retransmisión radiofónica de la obra. Falla concibió <em>El amor
+          brujo</em> como gitanería en un acto; Augusto lo eleva del costumbrismo al arte
+          de vanguardia.
+        </p>
+      </div>
+      <div class="slide-caption reveal reveal-delay-3">
+        <div class="slide-caption-text">Ilustración de Augusto · <em>Ondas</em>, 28 sep. 1929</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     012 — El velatorio (1935)
+══════════════════════════════════════════ -->
+<section id="slide-012" class="slide">
+  <div class="slide-inner layout-b">
+    <div class="slide-image">
+      <img src="images/012.webp" alt="El velatorio de Ángel Barrios, ilustración de Augusto, 1935">
+      <div class="slide-image-vignette"></div>
+    </div>
+    <div class="slide-text">
+      <p class="slide-num reveal">012</p>
+      <p class="slide-date reveal">2 de noviembre de 1935</p>
+      <p class="slide-author reveal">Ángel Barrios</p>
+      <h2 class="slide-title reveal reveal-delay-1">El velatorio</h2>
+      <span class="gold-line reveal reveal-delay-1"></span>
+      <div class="slide-body reveal reveal-delay-2">
+        <p>
+          Una de las últimas ilustraciones musicales de Augusto para <em>Ondas</em>, publicada
+          en noviembre de 1935. La escena, resuelta en xilografía, muestra un velatorio flamenco.
+          La obra de Ángel Barrios, compositor granadino, conecta con el universo del flamenco
+          que en otros itinerarios hemos visto llegar al micrófono.
+        </p>
+        <p>
+          Aquí, Augusto cierra un círculo: la música que la radio transmitía se convierte en
+          imagen, y la imagen nos devuelve al espacio original de esa música.
+        </p>
+      </div>
+      <div class="slide-caption reveal reveal-delay-3">
+        <div class="slide-caption-text">Ilustración de Augusto · <em>Ondas</em>, 2 nov. 1935</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     013 — Portada Ondas (1926)
+══════════════════════════════════════════ -->
+<section id="slide-013" class="slide">
+  <div class="slide-inner layout-a">
+    <div class="slide-image">
+      <img src="images/013.webp" alt="Portada de Ondas número 62, ilustración de Augusto, 1926">
+      <div class="slide-image-vignette"></div>
+    </div>
+    <div class="slide-text">
+      <p class="slide-num reveal">013</p>
+      <p class="slide-date reveal">22 de agosto de 1926</p>
+      <p class="slide-author reveal">Portada · Ondas n.º 62</p>
+      <h2 class="slide-title reveal reveal-delay-1">Portada de Ondas</h2>
+      <span class="gold-line reveal reveal-delay-1"></span>
+      <div class="slide-body reveal reveal-delay-2">
+        <p>
+          Cerramos con una de las primeras portadas musicales de Augusto para <em>Ondas</em>.
+          Una orquesta completa toca frenéticamente ante un enorme altavoz, bajo las letras
+          «ONDAS» resueltas en un grafismo audaz. Un cantante dirige su voz al micrófono
+          mientras el director agita los brazos.
+        </p>
+        <p>
+          Resuelta en tintas planas con un vibrante fondo rojo, esta imagen condensa el
+          espíritu de toda la exposición: la música producida en el estudio, captada por
+          el micrófono, amplificada por el altavoz, democratizada por la radio, reinventada
+          por la tecnología y, finalmente, dibujada por un artista que supo dar ojos
+          a lo que solo tenía sonido.
+        </p>
+      </div>
+      <div class="slide-caption reveal reveal-delay-3">
+        <div class="slide-caption-text">Portada <em>Ondas</em>, n.º 62 · Ilustración de Augusto · 22 ago. 1926</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     CODA
+══════════════════════════════════════════ -->
+<section id="coda">
+  <div class="coda-inner">
+    <div class="coda-icon reveal">◈</div>
+    <h2 class="coda-title reveal reveal-delay-1">
+      Augusto Fernández Sastre<br><em>1899–1975</em>
+    </h2>
+    <div class="coda-body reveal reveal-delay-2">
+      <p>
+        Las ilustraciones de Augusto para <em>Ondas</em> constituyen uno de los corpus gráficos
+        más importantes de la radio musical española de entreguerras.
+      </p>
+      <p>
+        Tras la Guerra Civil, Augusto Fernández Sastre se exilió a través del puerto de Alicante
+        en el carbonero <em>Stanbrook</em>. Pasó por los campos de concentración de Orán, luego
+        por Nicaragua, y finalmente se instaló en México en 1944, donde vivió hasta su muerte
+        en 1975 sin poder regresar a España.
+      </p>
+    </div>
+    <a href="https://leximususal.github.io/MUSLYME/exposicion_ondas_index.html"
+       class="coda-link reveal reveal-delay-3" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M8 2.5l5 5.5-5 5.5M3 8h10"/>
+      </svg>
+      Explorar más ilustraciones de Augusto
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-left">
+    <strong>LexiMus · Universidad de Salamanca</strong>
+    Léxico y ontología de la música en español<br>
+    PID2022-139589NB-C33
+  </div>
+  <div class="footer-right">
+    Fuente: Revista <em>Ondas</em>, Hemeroteca Nacional de España<br>
+    Itinerario 6 de 6 · Dibujar la música: Augusto
+  </div>
+</footer>
+
+<script>
+  const progressBar = document.getElementById('progress-bar');
+
+  function updateProgress() {
+    const pct = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+    progressBar.style.width = pct + '%';
+  }
+
+  const dots = document.querySelectorAll('.dot');
+  const sections = ['hero','intro','slide-001','slide-002','slide-003','slide-004',
+                    'slide-005','slide-006','slide-007','slide-008','slide-009',
+                    'slide-010','slide-011','slide-012','slide-013','coda'];
+
+  dots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      const el = document.getElementById(dot.dataset.target);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  function updateActiveDot() {
+    const mid = window.scrollY + window.innerHeight * 0.4;
+    let active = 0;
+    sections.forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (el && el.offsetTop <= mid) active = i;
+    });
+    dots.forEach((d, i) => d.classList.toggle('active', i === active));
+  }
+
+  const observer = new IntersectionObserver(
+    entries => entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+    }),
+    { threshold: 0.12 }
+  );
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  window.addEventListener('scroll', () => { updateProgress(); updateActiveDot(); }, { passive: true });
+  updateProgress();
+  updateActiveDot();
+
+  document.querySelectorAll('#hero .reveal').forEach((el, i) => {
+    setTimeout(() => el.classList.add('visible'), i * 180);
+  });
+</script>
+</body>
+</html>
